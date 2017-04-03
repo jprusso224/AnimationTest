@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<item-regestry>
+	<item object-key="basic-torso"/>
+	<item object-key="basic-leggings"/>
+	<item object-key="basic-boots"/>
+	<item object-key="basic-gloves"/>
+	<item object-key="basic-sword"/>
+	<item object-key="royal-sword"/>
+
+        <item object-key="race-tonosian"/>
+</item-regestry>

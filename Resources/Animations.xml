@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<player-frame-list>
+        <frame frame-id="player-ready-west" img-location="Resources\Sprites\Player\ReadyWest\">
+                <frame-layer-list>
+                        <frame-layer layer-name="race-layer" z-order="1">
+                                <layer-img object-key="race-tonosian" img="Tonosian_Ready_West_Base.png"/>
+                        </frame-layer>
+                        <frame-layer layer-name="leg-layer" z-order="2">
+                                <layer-img object-key="basic-leggings" img="Ready_West_Basic_Leggings.png"/>
+                        </frame-layer>
+                        <frame-layer layer-name="feet-layer" z-order="3">
+                                <layer-img object-key="basic-boots" img="Ready_West_Basic_Boots.png"/>
+                        </frame-layer>
+                        <frame-layer layer-name="torso-layer" z-order="4">
+                                <layer-img object-key="basic-torso" img="Ready_West_Basic_Torso.png"/>
+                        </frame-layer>
+                        <frame-layer layer-name="item-layer" z-order="5">
+                                <layer-img  object-key="basic-sword" img="Ready_West_Basic_Sword.png"/>
+                                <layer-img  object-key="royal-sword" img="Ready_West_Royal_Sword.png"/>
+                        </frame-layer>
+                        <frame-layer layer-name="hands-layer" z-order="6">
+                                <layer-img object-key="basic-gloves" img="Ready_West_Basic_Gloves.png"/>
+                        </frame-layer>
+                </frame-layer-list>
+	<frame>
+<!--Testing
+	<frame frame-id="running-west" img-location="Sprites\Player\ReadyWest\">
+		<frame-layers>
+		    <base object-key="player-base" img="Ready_West_Hero_Base.png"></base>
+			<leg-layer-list>
+				<leg-layer object-key="basic-leggings" img="Run_West_Basic_Leggings.png"/>
+			</leg-layer-list>		
+			<feet-layer-list>
+				<feet-layer  object-key="basic-boots" img="Run_West_Basic_Boots.png"/>
+		    </feet-layer-list>
+			<torso-layer-list>
+				<torso-layer object-key="basic-armor" img="Run_West_Basic_Torso.png"/>
+			</torso-layer-list>	
+			<item-layer-list>
+				<item-layer  object-key="basic-sword" img="Run_West_Basic_Sword.png"/>
+				<item-layer  object-key="royal-sword" img="Run_West_Royal_Sword.png"/>
+			</item-layer-list>	
+			<hands-layer-list>
+				<hands-layer object-key="basic-gloves" img="Run_West_Basic_Gloves.png"/>
+			</hands-layer-list>
+		</frame-layers>
+	<frame>
+        -->
+</player-frame-list>
+
+<player-animation-list>
+    <player-animation animation-id="running-west">
+		<frame frame-id="running-west" duration-ms="500">
+		<frame frame-id="ready-west" duration-ms="500">
+	</player-animation>
+</player-animation-list>
