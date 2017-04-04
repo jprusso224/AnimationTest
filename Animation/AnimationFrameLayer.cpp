@@ -13,12 +13,17 @@ AnimationFrameLayer::~AnimationFrameLayer()
 {
 }
 
-const QString AnimationFrameLayer::getLayerName()
+const Z_Order AnimationFrameLayer::getZOrder() const
+{
+    return zOrder;
+}
+
+const QString AnimationFrameLayer::getLayerName() const
 {
     return layerName;
 }
 
-const QHash<QString, QString> AnimationFrameLayer::getLayerImageHash()
+const QHash<QString, QString> AnimationFrameLayer::getLayerImageHash() const
 {
     return layerImgHashTable;
 }

@@ -16,13 +16,15 @@ public:
 
     virtual ~AnimationFrameLayer();
 
-    const QString getLayerName();
-    const QHash<QString, QString> getLayerImageHash();
+    const Z_Order getZOrder() const;
+    const QString getLayerName() const;
+    const QHash<QString, QString> getLayerImageHash() const;
+
     void insertFrameLayerImage(QString objectKey, QString imgName);
 
 private:
     QString layerName = "";
-    quint8 zOrder = 0;
+    Z_Order zOrder = 0;
     GameBoolean active = GAME_FALSE;
 
     QHash<QString, QString> layerImgHashTable;

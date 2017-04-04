@@ -148,7 +148,7 @@ void FrameConfigurationLoader::processFrameLayerTag()
         }
         else if(attrName.compare(Z_ORDER_ATTR) == 0)
         {
-            zOrder = static_cast<quint8>(attr.value().toInt());
+            zOrder = static_cast<Z_Order>(attr.value().toInt());
             zOrderSet = GAME_TRUE;
         }
         else

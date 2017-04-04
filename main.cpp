@@ -12,7 +12,83 @@
 
 #include "GameItem/GameItemRegestry.h"
 #include "Animation/FrameConfigurationLoader.h"
+#include "Input/InputHandler.h"
+#include "Utilities/GameTimer.h"
 #include "ImageRenderer.h"
+
+static const quint32 FRAME_RATE_MS = 300;
+static const quint32 SCREEN_WIDTH = 500;
+static const quint32 SCREEN_HEIGHT = 500;
+
+QMap<Z_Order, SDL_Texture*> createTextureMapFromFrame(ImageRenderer* imgRenderer, const AnimationFrame &frame)
+{
+
+    QMap<Z_Order, SDL_Texture*> zOrderTextureMap;
+
+    const QString frameImageLoc = frame.getImageLocation();
+
+    const QList<QSharedPointer<AnimationFrameLayer>> layerList = frame.getFrameLayerList();
+
+    for(QSharedPointer<AnimationFrameLayer> layer : layerList)
+    {
+        const QHash<QString, QString> imgLayerHash = layer.data()->getLayerImageHash();
+
+        /*
+         * Determing equipment
+         */
+        Z_Order zOrder = layer.data()->getZOrder();
+        QString layerName = layer.data()->getLayerName();
+        QString itemEquip = "";
+
+        if(layerName.compare(QString("torso-layer")) == 0)
+        {
+            itemEquip = QString("basic-armor");
+        }
+        else if (layerName.compare(QString("leg-layer")) == 0)
+        {
+            itemEquip = QString("basic-leggings");
+        }
+        else if (layerName.compare(QString("feet-layer")) == 0)
+        {
+            itemEquip = QString("basic-boots");
+        }
+        else if (layerName.compare(QString("hands-layer")) == 0)
+        {
+            itemEquip = QString("basic-gloves");
+        }
+        else if (layerName.compare(QString("item-layer")) == 0)
+        {
+            itemEquip = QString("basic-sword");
+        }
+        else if (layerName.compare(QString("race-layer")) == 0)
+        {
+            itemEquip = QString("race-tonosian");
+        }
+        else
+        {
+            //no-op
+        }
+
+        if(imgLayerHash.contains(itemEquip))
+        {
+            QString imgNameToDraw = imgLayerHash.value(itemEquip);
+            QString imgPath = frameImageLoc + imgNameToDraw;
+
+            SDL_Texture* texture = imgRenderer->renderImage(imgPath);
+
+            if(texture == nullptr)
+            {
+                qDebug() << IMG_GetError();
+            }
+            else
+            {
+                zOrderTextureMap.insert(zOrder, texture);
+            }
+        }
+    }
+
+    return zOrderTextureMap;
+}
 
 int main(int argc, char *argv[])
 {
@@ -54,7 +130,7 @@ int main(int argc, char *argv[])
         }
 
         //Create window
-        SDL_Window* window = SDL_CreateWindow( "Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 500, 500, SDL_WINDOW_SHOWN );
+        SDL_Window* window = SDL_CreateWindow( "Test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
         if( window == NULL )
         {
             qDebug() << QString("Window could not be created! SDL_Error: %0").arg(SDL_GetError());
@@ -77,94 +153,81 @@ int main(int argc, char *argv[])
         if(sdlLoadSuccess)
         {
 
+            InputHandler* inputHandler = new InputHandler();
+
             ImageRenderer *imgRenderer = new ImageRenderer(renderer);
             /*
              * Now its time to draw... Layer by layer, first img in each QHash.
              */
             const QList<QSharedPointer<AnimationFrame>> frameList = frameConfigLoader->getFrameList();
-            const AnimationFrame frameToDraw = *frameList.constFirst().data();
 
-            const QString frameImageLoc = frameToDraw.getImageLocation();
+            quint8 numFrames = frameList.length();
+            quint8 frameIdx = 0;
 
-            const QList<QSharedPointer<AnimationFrameLayer>> layerList = frameToDraw.getFrameLayerList();
+            /*Initialize game loop timer at fixed frame rate*/
+            GameTimer gameUpdateTimer;
+            gameUpdateTimer.start(FRAME_RATE_MS);
+            quint64 currentTime_ms = SDL_GetTicks();
+            quint64 elapsedTime_ms = 0;
 
-            for(QSharedPointer<AnimationFrameLayer> layer : layerList)
+            /********* THIS IS THE MAIN GAME LOOP ********************/
+            qDebug() << QString("Entering main loop!");
+
+            GameBoolean done = GAME_FALSE;
+            while (!done)
             {
-                const QHash<QString, QString> imgLayerHash = layer.data()->getLayerImageHash();
-
-                /*
-                 * Determing equipment
-                 */
-                QString layerName = layer.data()->getLayerName();
-                QString itemEquip = "";
-
-                if(layerName.compare(QString("torso-layer")) == 0)
+                // message processing
+                InputAction input = inputHandler->processInput();
+                if(input == InputAction::EXIT)
                 {
-                    itemEquip = QString("basic-armor");
-                }
-                else if (layerName.compare(QString("leg-layer")) == 0)
-                {
-                    itemEquip = QString("basic-leggings");
-                }
-                else if (layerName.compare(QString("feet-layer")) == 0)
-                {
-                    itemEquip = QString("basic-boots");
-                }
-                else if (layerName.compare(QString("hands-layer")) == 0)
-                {
-                    itemEquip = QString("basic-gloves");
-                }
-                else if (layerName.compare(QString("item-layer")) == 0)
-                {
-                    itemEquip = QString("basic-sword");
-                }
-                else if (layerName.compare(QString("race-layer")) == 0)
-                {
-                    itemEquip = QString("race-tonosian");
-                }
-                else
-                {
-                    //no-op
+                    done = GAME_TRUE;
+                    break;
                 }
 
-                if(imgLayerHash.contains(itemEquip))
+                //compute elapsed time
+                currentTime_ms = SDL_GetTicks();
+
+                //always update the game loop timer!
+                gameUpdateTimer.update(currentTime_ms - elapsedTime_ms);
+
+                elapsedTime_ms = currentTime_ms;
+
+                //Allow game to continue if game loop timer expires
+                if(gameUpdateTimer.isExpired())
                 {
-                    QString imgNameToDraw = imgLayerHash.value(itemEquip);
-                    QString imgPath = frameImageLoc + imgNameToDraw;
+                    //render the game
+                    const QSharedPointer<AnimationFrame> frameToDraw = frameList.at(frameIdx);
 
-                    SDL_Texture* txt = imgRenderer->renderImage(imgPath);
+                    QMap<Z_Order, SDL_Texture*> zOrderTextureMap = createTextureMapFromFrame(imgRenderer, *frameToDraw.data());
 
-                    if(txt != nullptr)
+                    for(SDL_Texture* txt : zOrderTextureMap)
                     {
-                            SDL_Rect srcRect;
-                            srcRect.h = 32;
-                            srcRect.w = 32;
-                            srcRect.x = 0;
-                            srcRect.y = 0;
-
-                            SDL_Rect dstRect;
-                            dstRect.h = 32;
-                            dstRect.w = 32;
-                            dstRect.x = 0;
-                            dstRect.y = 0;
-
+                        if(txt != nullptr)
+                        {
+                            SDL_Rect srcRect = {0,0,32,32};
+                            SDL_Rect dstRect = {(SCREEN_WIDTH/2)-64,(SCREEN_HEIGHT/2)-64,64,64};
                             SDL_RenderCopy(renderer, txt, &srcRect, &dstRect);
-                    }
-                    else
-                    {
-                        qDebug() << IMG_GetError();
+                        }
                     }
 
+                    SDL_RenderPresent( renderer );
+                    SDL_RenderClear( renderer );
+
+                    //restart the game loop timer
+                    gameUpdateTimer.start(FRAME_RATE_MS);
+
+                    //update frame Idx
+                    frameIdx++;
+                    if(frameIdx >= numFrames)
+                    {
+                        frameIdx = 0;
+                    }
                 }
             }
+            /*********END MAIN LOOP***********************************/
 
-            SDL_RenderPresent( renderer );
-            SDL_RenderClear( renderer );
-
-            Sleep(3000);
+            }
         }
-
-    }
 
     /*Goodbye*/
     SDL_Quit();

@@ -30,7 +30,9 @@ SOURCES += main.cpp \
     Animation/AnimationFrame.cpp \
     Animation/FrameConfigurationLoader.cpp \
     Animation/AnimationFrameLayer.cpp \
-    ImageRenderer.cpp
+    ImageRenderer.cpp \
+    Input/InputHandler.cpp \
+    Utilities/GameTimer.cpp
 
 HEADERS += \
     GameItem/GameItem.h \
@@ -39,7 +41,9 @@ HEADERS += \
     GameTypes.h \
     Animation/FrameConfigurationLoader.h \
     Animation/AnimationFrameLayer.h \
-    ImageRenderer.h
+    ImageRenderer.h \
+    Input/InputHandler.h \
+    Utilities/GameTimer.h
 
 DISTFILES += \
     Resources/ItemRegestry.xml \
